@@ -1,0 +1,91 @@
+package th.go.sso.newcore.cont.refund.inquiry.dao.mapper;
+
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.lang.NonNull;
+import th.go.sso.newcore.cont.refund.inquiry.bean.RefundChangeEligibleBean;
+import th.go.sso.newcore.cont.refund.inquiry.bean.RefundChangeEmployeeBranchPeriodBean;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+public class ConTbRefundChangeEligibleRowMapper implements RowMapper<RefundChangeEligibleBean> {
+    @Override
+    public RefundChangeEligibleBean mapRow(@NonNull ResultSet rs, int rowNum)  throws SQLException {
+        RefundChangeEligibleBean bean = new RefundChangeEligibleBean();
+        bean.setIdCardNo(rs.getString("id_card_no"));
+        bean.setFullName(rs.getString("full_name"));
+        bean.setTitleCode(rs.getString("title_code"));
+        bean.setFirstName(rs.getString("first_name"));
+        bean.setLastName(rs.getString("last_name"));
+        bean.setRelation(rs.getString("relation"));
+        bean.setAddress(rs.getString("address"));
+        bean.setVillage(rs.getString("village"));
+        bean.setMoo(rs.getString("moo"));
+        bean.setSoi(rs.getString("soi"));
+        bean.setRoad(rs.getString("road"));
+        bean.setProvinceCode(rs.getString("province_code"));
+        bean.setProvinceName(rs.getString("province_name"));
+        bean.setDistCode(rs.getString("dist_code"));
+        bean.setDistName(rs.getString("dist_name"));
+        bean.setSubdistCode(rs.getString("subdist_code"));
+        bean.setSubdistName(rs.getString("subdist_name"));
+        bean.setZipCode(rs.getString("zip_code"));
+        bean.setTelephone(rs.getString("telephone"));
+        bean.setMobile(rs.getString("mobile"));
+        bean.setEmail(rs.getString("email"));
+        bean.setPaymentPlaceType(rs.getString("payment_place_type"));
+        bean.setBankCode(rs.getString("bank_code"));
+        bean.setBankAcc(rs.getString("bank_acc"));
+        bean.setBankAccName(rs.getString("bank_acc_name"));
+        bean.setPromptpay(rs.getString("promptpay"));
+        bean.setSsoCode(rs.getString("sso_code"));
+        bean.setCreateBy(rs.getString("create_by"));
+        bean.setCreateDate(rs.getDate("create_date"));
+        bean.setRelationGroup(rs.getString("relation_group"));
+        bean.setNationalityCode(rs.getString("nationality_code"));
+        bean.setNationality(rs.getString("nationality"));
+        bean.setRefundRequestChangeTypeId(rs.getLong("refund_request_change_type_id"));
+        bean.setRefundChangeEligibleId(rs.getLong("refund_change_eligible_id"));
+        bean.setRefundTotalAmount(rs.getBigDecimal("refund_total_amount"));
+        bean.setRefundInterestAmount(rs.getBigDecimal("refund_interest_amount"));
+        bean.setRefundTotalAmountChange(rs.getBigDecimal("refund_total_amount_change"));
+        bean.setIdCardNoChange(rs.getString("id_card_no_change"));
+        bean.setFullNameChange(rs.getString("full_name_change"));
+        bean.setTitleCodeChange(rs.getString("title_code_change"));
+        bean.setFirstNameChange(rs.getString("first_name_change"));
+        bean.setLastNameChange(rs.getString("last_name_change"));
+        bean.setRefundInterestAmountChange(rs.getBigDecimal("refund_interest_amount_change"));
+        bean.setRelationChange(rs.getString("relation_change"));
+        bean.setAddressChange(rs.getString("address_change"));
+        bean.setVillageChange(rs.getString("village_change"));
+        bean.setMooChange(rs.getString("moo_change"));
+        bean.setSoiChange(rs.getString("soi_change"));
+        bean.setRoadChange(rs.getString("road_change"));
+        bean.setProvinceCodeChange(rs.getString("province_code_change"));
+        bean.setProvinceNameChange(rs.getString("province_name_change"));
+        bean.setDistCodeChange(rs.getString("dist_code_change"));
+        bean.setDistNameChange(rs.getString("dist_name_change"));
+        bean.setSubdistCodeChange(rs.getString("subdist_code_change"));
+        bean.setSubdistNameChange(rs.getString("subdist_name_change"));
+        bean.setZipCodeChange(rs.getString("zip_code_change"));
+        bean.setTelephoneChange(rs.getString("telephone_change"));
+        bean.setMobileChange(rs.getString("mobile_change"));
+        bean.setEmailChange(rs.getString("email_change"));
+        bean.setPaymentPlaceTypeChange(rs.getString("payment_place_type_change"));
+        bean.setBankCodeChange(rs.getString("bank_code_change"));
+        bean.setBankAccChange(rs.getString("bank_acc_change"));
+        bean.setBankAccNameChange(rs.getString("bank_acc_name_change"));
+        bean.setPromptpayChange(rs.getString("promptpay_change"));
+        bean.setSsoCodeChange(rs.getString("sso_code_change"));
+        bean.setRelationGroupChange(rs.getString("relation_group_change"));
+        bean.setNationalityCodeChange(rs.getString("nationality_code_change"));
+        bean.setNationalityChange(rs.getString("nationality_change"));
+        bean.setRefundSicknessAmount(rs.getBigDecimal("refund_sickness_amount"));
+        bean.setRefundSicknessAmountChange(rs.getBigDecimal("refund_sickness_amount_change"));
+        bean.setRefundRetirementAmount(rs.getBigDecimal("refund_retirement_amount"));
+        bean.setRefundRetirementAmountChange(rs.getBigDecimal("refund_retirement_amount_change"));
+        bean.setRefundUnemploymentAmount(rs.getBigDecimal("refund_unemployment_amount"));
+        bean.setRefundUnemploymentAmountChange(rs.getBigDecimal("refund_unemployment_amount_change"));
+        return bean;
+    }
+}

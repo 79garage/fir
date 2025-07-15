@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: sso-con-dev
+  name: sso-con-refundinq
+  labels:
+    app: sso-con-refundinq
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sso-con-refundinq
+  template:
+    metadata:
+      labels:
+        app: sso-con-refundinq
+    spec:
+      imagePullSecrets:
+        - name: gitlab-registry
+      containers:
+        - name: sso-con-refundinq
+          image: IMAGE_REPLACE
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "250m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"

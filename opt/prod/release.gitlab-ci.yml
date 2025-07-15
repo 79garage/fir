@@ -1,0 +1,52 @@
+variables:
+  DEPLOYMENT_PROD_PATH: opt/prod
+  NAMESPACE_PROD: ssocon
+buildImage:
+  image: docker:latest
+  stage: harbor-image
+  tags:
+    - builder
+  before_script:
+    - git clone -b uat $COMMON_GIT_URL
+  script:
+    - export LATEST_TAG=$(git describe --abbrev=0 --tags)
+    - echo "LATEST_TAG=$LATEST_TAG"
+    - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u "$CI_REGISTRY_USER" --password-stdin
+    - docker build -f $DEPLOYMENT_PROD_PATH/Dockerfile -t $CI_REGISTRY/$CI_PROJECT_PATH:$LATEST_TAG .
+    - docker push $CI_REGISTRY/$CI_PROJECT_PATH:$LATEST_TAG
+    - echo "LATEST_TAG=$LATEST_TAG" > ./opt/prod/tag.env
+  only :
+    - /^\d+\.\d+\.\d+$/ # Only trigger this job when a tag is created
+  artifacts:
+    reports:
+      dotenv: ./opt/prod/tag.env
+
+helmChart:
+  image: bitnami/kubectl:1.23.7
+  stage: harbor-chart
+  tags:
+    - uatk8srunner
+  script:
+    - echo $HARBOR_REGISTRY
+    - echo $HARBOR_PROJECT_PATH_IMAGE
+    - echo $HARBOR_PROJECT_PATH_CHART
+    - echo $LATEST_TAG
+    - cat $DEPLOYMENT_PROD_PATH/.cienv
+    - source $DEPLOYMENT_PROD_PATH/.cienv
+    - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u "$CI_REGISTRY_USER" --password-stdin
+    - echo "docker pull $CI_REGISTRY/$CI_PROJECT_PATH:$LATEST_TAG"
+    - docker pull $CI_REGISTRY/$CI_PROJECT_PATH:$LATEST_TAG
+    - docker tag $CI_REGISTRY/$CI_PROJECT_PATH:$LATEST_TAG $HARBOR_PROJECT_PATH_IMAGE/$CI_PROJECT_PATH:$LATEST_TAG
+    - docker push $HARBOR_PROJECT_PATH_IMAGE/$CI_PROJECT_PATH:$LATEST_TAG
+    - sed -i "s#DEPLOYMENTIMAGE#$HARBOR_PROJECT_PATH_IMAGE/$CI_PROJECT_PATH:$LATEST_TAG#g" $DEPLOYMENT_PROD_PATH/deployment.yaml
+    - sed -i "s#APPNAME#$APP_NAME#g" $DEPLOYMENT_PROD_PATH/deployment.yaml
+    - sed -i "s#PORT#$PORT#g" $DEPLOYMENT_PROD_PATH/deployment.yaml
+    - cat $DEPLOYMENT_PROD_PATH/deployment.yaml
+    - command -v helmify
+    - helmify -f $DEPLOYMENT_PROD_PATH/deployment.yaml $APP_NAME
+    - helm template $APP_NAME
+    - helm package $APP_NAME --version $LATEST_TAG
+    - echo "$HARBOR_PASSWORD" | docker login $HARBOR_REGISTRY -u $HARBOR_REGISTRY_USER --password-stdin 
+    - helm push $APP_NAME-$LATEST_TAG.tgz $HARBOR_PROJECT_PATH_CHART --insecure-skip-tls-verify
+  only :
+    - /^\d+\.\d+\.\d+$/ # Only trigger this job when a tag is created

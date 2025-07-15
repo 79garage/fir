@@ -1,0 +1,16 @@
+server:
+   servlet:
+      contextPath: /con-refund-inq-manager
+db:
+  con:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+redis:
+  cluster:
+    hosts: ${REDIS_CLUSTER_HOSTS}
+logging:
+  level:
+    root: ERROR
+    th.go.sso.newcore.cont.refund.inquiry.business: DEBUG
+    th.go.sso.newcore.cont.refund.inquiry.ws.provider: DEBUG

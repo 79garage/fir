@@ -1,0 +1,17 @@
+services:
+  - docker:dind
+stages:
+  - build
+  - deploy
+  - harbor-image
+  - harbor-chart
+variables:
+  #  KUBECONFIG: /etc/deploy/config
+  DOCKER_HOST: "tcp://docker:2375"
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: ""
+  GIT_STRATEGY: clone
+include:
+  #- local: opt/dev/.gitlab-ci.yml
+  - local: opt/uat/.gitlab-ci.yml
+  - local: opt/prod/release.gitlab-ci.yml

@@ -1,0 +1,48 @@
+services:
+  - docker:dind
+stages:
+  - build
+  - deploy
+variables:
+  DEPLOYMENT_PATH: opt/dev
+  KUBECONFIG: /etc/deploy/config
+  DOCKER_HOST: "tcp://docker:2375"
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: ""
+  GIT_STRATEGY: clone
+  #CI_REGISTRY: http://sso-gitlab.com:5000/v2/
+  CONTAINER_IMG: $CI_REGISTRY/$CI_PROJECT_PATH:$CI_PIPELINE_IID
+
+build:
+  image: docker:latest
+  stage: build
+  tags:
+    - builder
+  before_script:
+    - git clone $COMMON_GIT_URL
+  script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u "$CI_REGISTRY_USER" --password-stdin
+    - docker build -t $CI_REGISTRY/$CI_PROJECT_PATH:$CI_PIPELINE_IID -f $DEPLOYMENT_PATH/Dockerfile .
+    - docker push $CI_REGISTRY/$CI_PROJECT_PATH:$CI_PIPELINE_IID
+  only :
+    - develop
+deploy:
+  image: bitnami/kubectl:1.23.7
+  stage: deploy
+  tags:
+    - k8srunner
+  script:
+    - source $DEPLOYMENT_PATH/.env
+    - export KUBECONFIG=~/.kube/config
+    - echo $kube_config |base64 -d > $KUBECONFIG
+    - echo $kube_config |base64 -d
+    - kubectl delete secret gitlab-auth  --ignore-not-found
+    - sed -i "s#DEPLOYMENTIMAGE#$CI_REGISTRY/$CI_PROJECT_PATH:$CI_PIPELINE_IID#g" $DEPLOYMENT_PATH/deployment.yaml
+    - sed -i "s#APPNAME#$APP_NAME#g" $DEPLOYMENT_PATH/deployment.yaml
+    - sed -i "s#PORT#$PORT#g" $DEPLOYMENT_PATH/deployment.yaml
+    - sed -i "s#NODEP#$NODEPORT#g" $DEPLOYMENT_PATH/deployment.yaml
+    - cat $DEPLOYMENT_PATH/deployment.yaml
+    - kubectl create secret docker-registry gitlab-auth --docker-server=$CI_REGISTRY --docker-username="$DEPLOYUSR" --docker-password="$DEPLOYPASSWD"
+    - kubectl apply -f $DEPLOYMENT_PATH/deployment.yaml
+  only :
+    - develop

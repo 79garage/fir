@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: con-app-config
+  namespace: ssocon
+data:
+  db-url: jdbc:oracle:thin:@//P8DBSCANPRO:1521/SSODB
+  redis-cluster-hosts: 172.20.85.20:6479,172.20.85.21:6480,172.20.85.22:6480
+  jwt-expire-hr: "24"
+  keycloak-endpoint: https://ssologin.sso.go.th/realms/sso-realm
+  #kafka-broker: 

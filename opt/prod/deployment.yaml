@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: APPNAME-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: APPNAME
+  template:
+    metadata:
+      labels:
+        app: APPNAME
+    spec:
+      containers:
+        - name: APPNAME
+          image: DEPLOYMENTIMAGE
+          ports:
+            - containerPort: PORT
+          resources:
+            requests:
+              cpu: 100m
+          env:
+            - name: DB_URL
+              valueFrom:
+                configMapKeyRef:
+                  key: db-url
+                  name: con-app-config
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: db-username
+                  name: con-app-secret
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: db-password
+                  name: con-app-secret
+            - name: REDIS_CLUSTER_HOSTS
+              valueFrom:
+                configMapKeyRef:
+                  key: redis-cluster-hosts
+                  name: con-app-config
+      imagePullSecrets:
+        - name: gitlab-auth
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: APPNAME-hscale
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: APPNAME-deployment
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 85
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 600
+      policies:
+      - type: Pods
+        value: 2
+        periodSeconds: 600
+    scaleUp:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Pods
+        value: 2
+        periodSeconds: 60
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: APPNAME-service
+spec:
+  type: ClusterIP
+  selector:
+    app: APPNAME
+  ports:
+    - port: PORT
+      protocol: TCP
+      targetPort: PORT

@@ -1,0 +1,36 @@
+variables:
+  DEPLOYMENT_UAT_PATH: opt/uat
+  NAMESPACE_UAT: ssocon
+builduat:
+  image: docker:latest
+  stage: build
+  tags:
+    - builder
+  before_script:
+    - git clone -b uat $COMMON_GIT_URL
+  script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u "$CI_REGISTRY_USER" --password-stdin
+    - docker build -f $DEPLOYMENT_UAT_PATH/Dockerfile -t $CI_REGISTRY/$CI_PROJECT_PATH:$CI_COMMIT_BRANCH-$CI_PIPELINE_IID .
+    - docker push $CI_REGISTRY/$CI_PROJECT_PATH:$CI_COMMIT_BRANCH-$CI_PIPELINE_IID
+  only :
+    - uat
+deployuat:
+  image: bitnami/kubectl:1.23.7
+  stage: deploy
+  tags:
+    - uatk8srunner
+  script:
+    - echo "###################test read.cienv################"
+    - cat $DEPLOYMENT_UAT_PATH/.cienv
+    - source $DEPLOYMENT_UAT_PATH/.cienv
+    - export KUBECONFIG=~/.kube/config
+    - echo $KUBECONFIGUAT |base64 -d > $KUBECONFIG
+    - kubectl delete secret gitlab-auth  --ignore-not-found --namespace=$NAMESPACE_UAT
+    - sed -i "s#DEPLOYMENTIMAGE#$CI_REGISTRY/$CI_PROJECT_PATH:$CI_COMMIT_BRANCH-$CI_PIPELINE_IID#g" $DEPLOYMENT_UAT_PATH/deployment.yaml
+    - sed -i "s#APPNAME#$APP_NAME#g" $DEPLOYMENT_UAT_PATH/deployment.yaml
+    - sed -i "s#PORT#$PORT#g" $DEPLOYMENT_UAT_PATH/deployment.yaml
+    - cat $DEPLOYMENT_UAT_PATH/deployment.yaml
+    - kubectl create secret docker-registry gitlab-auth --docker-server=$CI_REGISTRY --docker-username="$DEPLOYUSR" --docker-password="$DEPLOYPASSWD" --namespace=$NAMESPACE_UAT
+    - kubectl apply -f $DEPLOYMENT_UAT_PATH/deployment.yaml --namespace=$NAMESPACE_UAT
+  only :
+    - uat

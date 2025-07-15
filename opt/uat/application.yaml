@@ -1,0 +1,22 @@
+server:
+   servlet:
+      contextPath: /con-refund-inq-manager
+db:
+  con:
+    url: jdbc:oracle:thin:@//172.20.96.25:1521/SSODBTMP
+    username: SSOCONSCM
+    password: Pa55w0rd
+redis:
+  cluster:
+    hosts:
+      172.20.95.40:6479,
+      172.20.95.41:6480,
+      172.20.95.42:6480
+    
+logging:
+  level:
+    root: INFO
+    th.go.sso.newcore.cont.refund.inquiry.business: DEBUG
+    th.go.sso.newcore.cont.refund.inquiry.ws.provider: DEBUG
+    th.go.sso.newcore.cont.refund.inquiry.config: DEBUG
+    th.go.sso.newcore.cont.refund.inquiry.listener: DEBUG
